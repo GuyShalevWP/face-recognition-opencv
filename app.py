@@ -10,6 +10,7 @@ from kivy.clock import Clock
 from kivy.graphics import Color, Rectangle
 import numpy as np
 from kivy.core.audio import SoundLoader  # Using Kivy's SoundLoader for cross-platform
+import pickle  # For saving and loading registered faces
 
 # Initialize Mediapipe face mesh
 mp_face_mesh = mp.solutions.face_mesh
@@ -34,6 +35,22 @@ def play_success_sound():
     if success_sound:
         success_sound.play()
 
+def save_registered_faces(file_path='registered_faces.pkl'):
+    """Save the registered faces dictionary to a file."""
+    with open(file_path, 'wb') as f:
+        pickle.dump(registered_faces, f)
+    print("Registered faces saved.")
+
+def load_registered_faces(file_path='registered_faces.pkl'):
+    """Load the registered faces dictionary from a file."""
+    global registered_faces
+    try:
+        with open(file_path, 'rb') as f:
+            registered_faces = pickle.load(f)
+        print("Registered faces loaded.")
+    except FileNotFoundError:
+        print("No registered faces found.")
+
 class CameraWidget(Image):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -51,6 +68,9 @@ class CameraWidget(Image):
 
 class FaceRecognitionApp(App):
     def build(self):
+        # Load any previously registered faces
+        load_registered_faces()
+
         # Main layout
         self.layout = BoxLayout(orientation='vertical')
 
@@ -152,6 +172,7 @@ class FaceRecognitionApp(App):
             if registered_faces['right']:
                 self.message_label.text = "Face registration complete!"
                 play_success_sound()  # Play success sound when registration is complete
+                save_registered_faces()  # Save the registered face landmarks
             else:
                 self.message_label.text = "Failed to detect face on the right. Try again."
 
