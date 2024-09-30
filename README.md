@@ -22,7 +22,7 @@ cd project
 
 ```
 python -m virtualenv env
-source env/bin/activate
+source env\Scripts\activate
 ```
 
 3. Install Dependencies:
